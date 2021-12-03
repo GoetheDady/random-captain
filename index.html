@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css"
+		rel="stylesheet">
+		<title>
+			生成随机队友
+		</title>
+		<style>
+			.captain-content { display: flex; justify-content: space-between;} .captain-content
+			.captain-item { width: 40rem; height: 20rem; line-height: 20rem; text-align:
+			center; background-color: #0d6efd; color: #fff; font-size: 7rem; } .vice-captain-content
+			{ display: flex; justify-content: space-between;} .vice-captain-content
+			.vice-captain-item { width: 30rem; height: 18rem; line-height: 18rem; text-align:
+			center; background-color: #0d6efd; color: #fff; font-size: 7rem; } .random-btn
+			{ display: flex; justify-content: center; align-items: center; width: 100%;
+			position: fixed; bottom: 20rem; } .random-btn .btn-success { height: 14rem;
+			width: 30rem; border-radius: 2rem; font-size: 5rem; margin: 0 10rem;} .random-content
+			{ position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+			font-size: 20rem; width: 100%; text-align: center; }
+		</style>
+	</head>
+	<body>
+		<div class="captain-content">
+			<div class="captain-item">
+				郑志坚
+			</div>
+			<div class="captain-item gdsw-btn">
+				戈德斯文
+			</div>
+		</div>
+		<div class="vice-captain-content">
+			<div class="vice-captain-item">
+				刘立新
+			</div>
+			<div class="vice-captain-item">
+				颜玮琦
+			</div>
+		</div>
+		<div class="random-content">
+		</div>
+		<div class="random-btn">
+			<button type="button" class="btn btn-success start-btn">
+				我来选队长
+			</button>
+			<button type="button" class="btn btn-success stop-btn">
+				我停
+			</button>
+		</div>
+		<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js">
+		</script>
+		<script src="https://cdn.bootcdn.net/ajax/libs/localforage/1.9.0/localforage.min.js">
+		</script>
+		<script>
+			$('html').css('font-size', $(window).width() / 150)
+		</script>
+		<script>
+			const CAPTAIN_ARRAY = ['郑志坚', '戈德斯文'];
+      const randomContent = $('.random-content');
+      const stopBtn = $('.stop-btn');
+      const startBtn = $('.start-btn');
+      let animationId = null;
+      let goldFinger = 0;
+      let DO_YOU_HAVE_RANDOM;
+      let MY_CAPTAIN;
+      localforage.getItem('DO_YOU_HAVE_RANDOM').then(value => {
+          init(value)
+      })
+
+      function init(value) {
+          DO_YOU_HAVE_RANDOM = value || false;
+          if (!DO_YOU_HAVE_RANDOM) {
+              stopBtn.attr('disabled', '');
+          } else {
+              localforage.getItem('MY_CAPTAIN').then(value => {
+                  stopBtn.attr('disabled', '');
+                  startBtn.attr('disabled', '');
+                  randomContent.text(value)
+              })
+          }
+      }
+
+      function show() {
+          const text = randomContent.text();
+          if (text === CAPTAIN_ARRAY[0]) {
+              randomContent.text(CAPTAIN_ARRAY[1])
+          } else {
+              randomContent.text(CAPTAIN_ARRAY[0])
+          }
+      }
+
+      function getRandomCaptain() {
+          const RANDOM_NUM = parseInt(Math.random() * 100, 10);
+          if (RANDOM_NUM > 50) {
+              return '郑志坚'
+          } else if (RANDOM_NUM < 50) {
+              return '戈德斯文'
+          } else {
+              getRandomCaptain()
+          }
+      }
+
+      $('.start-btn').bind('click', () => {
+          console.log('开始')
+          startBtn.attr('disabled', '')
+          stopBtn.removeAttr('disabled')
+          animationId = setInterval(() => {
+              show()
+          }, 100);
+          localforage.setItem('DO_YOU_HAVE_RANDOM', true)
+      })
+      $('.stop-btn').bind('click', () => {
+          console.log('关闭')
+          stopBtn.attr('disabled', '')
+          clearInterval(animationId)
+          const myCaptain = getRandomCaptain();
+          randomContent.text(myCaptain);
+          localforage.setItem('MY_CAPTAIN', myCaptain)
+      })
+      $('.gdsw-btn').bind('click', () => {
+        if (goldFinger < 15) {
+          goldFinger++
+        } else {
+          localforage.clear().then(() => {
+            window.location.reload()
+          })
+        }
+      })
+		</script>
+	</body>
+
+</html>
